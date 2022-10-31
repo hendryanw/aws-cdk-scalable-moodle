@@ -5,5 +5,5 @@ import { ScalableMoodleStack } from '../lib/scalable-moodle-stack';
 
 const app = new cdk.App();
 new ScalableMoodleStack(app, 'scalable-moodle-stack', {
-  keyName: 'hendryaw'
+  keyName: ''
 });
