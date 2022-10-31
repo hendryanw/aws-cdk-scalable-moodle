@@ -2,7 +2,9 @@
 
 ## Overview
 
-This repository is part of Scalable Moodle on AWS deployment guide. It contains AWS CDK stack that can be used to deploy baseline infrastructure for Scalable Moodle deployment on AWS. The purpose is to save time in deploying the required baseline infrastructure for a scalable Moodle deployment on AWS.
+This repository is part of Scalable Moodle on AWS deployment guide to be used in the workshop scenario. As such, it should not be used on its own.
+
+It contains AWS CDK stack that can be used to deploy baseline infrastructure for Scalable Moodle deployment on AWS. The purpose is to save time in deploying the required baseline infrastructure for a scalable Moodle deployment on AWS.
 
 Once the baseline infrastructure is deployed, administrator can continue with installing the Moodle software on top of Moodle Staging Server, and then configure the pre-defined auto-scaling group to use the latest Amazon EC2 AMI from the Moodle Staging Server.
 
