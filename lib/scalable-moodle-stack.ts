@@ -37,19 +37,22 @@ export class ScalableMoodleStack extends cdk.Stack {
       description: 'Security group for Moodle server',
       allowAllOutbound: true
     });
+    moodleSg.connections.allowFromAnyIpv4(ec2.Port.tcp(80), 'Allow HTTP from Internet');
 
     // Install httpd as default
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
       'yum -y install httpd',
       'chkconfig httpd on',
-      'service httpd start',
+      'systemctl start httpd',
       'touch /var/www/html/index.html',
       'echo "Hello World" > /var/www/html/index.html'
     );
 
     const moodleLt = new ec2.LaunchTemplate(this, 'moodle-lt', {
-      machineImage: ec2.MachineImage.latestAmazonLinux(),
+      machineImage: ec2.MachineImage.latestAmazonLinux({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
+      }),
       blockDevices: [
         {
           deviceName: '/dev/xvda',
@@ -88,7 +91,9 @@ export class ScalableMoodleStack extends cdk.Stack {
     // Moodle staging server
     const moodleStagingServer = new ec2.Instance(this, 'moodle-staging-server', {
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.LARGE),
-      machineImage: ec2.MachineImage.latestAmazonLinux(),
+      machineImage: ec2.MachineImage.latestAmazonLinux({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
+      }),
       blockDevices: [
         {
           deviceName: '/dev/xvda',
