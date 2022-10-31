@@ -207,5 +207,25 @@ export class ScalableMoodleStack extends cdk.Stack {
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
       }
     });
+
+    // Outputs
+    new cdk.CfnOutput(this, 'APPLICATION-LOAD-BALANCER-DNS-NAME', {
+      value: alb.loadBalancerDnsName
+    });
+    new cdk.CfnOutput(this, 'CLOUDFRONT-DNS-NAME', {
+      value: cf.distributionDomainName
+    });
+    new cdk.CfnOutput(this, 'MOODLE-REDIS-PRIMARY-ENDPOINT-ADDRESS-AND-PORT', {
+      value: `${moodleRedis.attrPrimaryEndPointAddress}:${moodleRedis.attrPrimaryEndPointPort}`
+    });
+    new cdk.CfnOutput(this, 'MOODLE-DB-ENDPOINT', {
+      value: moodleDb.dbInstanceEndpointAddress
+    });
+    new cdk.CfnOutput(this, 'MOODLE-EFS-ID', {
+      value: moodleEfs.fileSystemId
+    });
+    new cdk.CfnOutput(this, 'MOODLE-CLOUDFRONT-DIST-ID', {
+      value: cf.distributionId
+    });
   }
 }
