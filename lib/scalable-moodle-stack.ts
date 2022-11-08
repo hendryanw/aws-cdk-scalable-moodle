@@ -39,16 +39,6 @@ export class ScalableMoodleStack extends cdk.Stack {
     });
     moodleSg.connections.allowFromAnyIpv4(ec2.Port.tcp(80), 'Allow HTTP from Internet');
 
-    // Install httpd as default
-    const userData = ec2.UserData.forLinux();
-    userData.addCommands(
-      'yum -y install httpd',
-      'chkconfig httpd on',
-      'systemctl start httpd',
-      'touch /var/www/html/index.html',
-      'echo "Hello World" > /var/www/html/index.html'
-    );
-
     const moodleLt = new ec2.LaunchTemplate(this, 'moodle-lt', {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
@@ -59,10 +49,10 @@ export class ScalableMoodleStack extends cdk.Stack {
           volume: ec2.BlockDeviceVolume.ebs(30)
         }
       ],
+      keyName: props.keyName,
       securityGroup: moodleSg,
       detailedMonitoring: true, // Enable detailed monitoring for faster scaling
-      cpuCredits: ec2.CpuCredits.UNLIMITED,
-      userData: userData
+      cpuCredits: ec2.CpuCredits.UNLIMITED
     });
 
     const moodleAsg = new autoscaling.AutoScalingGroup(this, 'moodle-asg', {
@@ -150,7 +140,7 @@ export class ScalableMoodleStack extends cdk.Stack {
     redisSG.connections.allowFrom(moodleSg, ec2.Port.tcp(6379), 'From Moodle Application Service');
 
     const redisSubnetGroup = new elasticache.CfnSubnetGroup(this, 'redis-subnet-group', {
-      cacheSubnetGroupName: 'moodle-redis-private-subnet-group',
+      cacheSubnetGroupName: `${cdk.Names.uniqueId(this)}-redis-subnet-group`,
       description: 'Moodle Redis Subnet Group',
       subnetIds: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnetIds
     });
@@ -163,7 +153,7 @@ export class ScalableMoodleStack extends cdk.Stack {
       multiAzEnabled: true,
       automaticFailoverEnabled: true,
       autoMinorVersionUpgrade: true,
-      cacheSubnetGroupName: 'moodle-redis-private-subnet-group',
+      cacheSubnetGroupName: `${cdk.Names.uniqueId(this)}-redis-subnet-group`,
       securityGroupIds: [ redisSG.securityGroupId ],
       atRestEncryptionEnabled: true
     });
