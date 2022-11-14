@@ -5,5 +5,6 @@ import { ScalableMoodleStack } from '../lib/scalable-moodle-stack';
 
 const app = new cdk.App();
 new ScalableMoodleStack(app, 'scalable-moodle-stack', {
-  keyName: ''
+  keyName: '',
+  multiAzEnabled: true // Set this to false to reduce cost, but it will disable high-availability configuration for NAT Gateway, RDS, and ElastiCache for Redis.
 });

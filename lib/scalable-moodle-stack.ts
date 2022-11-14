@@ -10,7 +10,11 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export interface ScalableMoodleStackProps extends cdk.StackProps {
-  keyName: string
+  // Amazon EC2 Key Pair Name for SSH into Moodle Application Server
+  keyName: string;
+
+  // Enable Multi-AZ for High-Availability.
+  multiAzEnabled: boolean;
 }
 
 export class ScalableMoodleStack extends cdk.Stack {
@@ -28,7 +32,8 @@ export class ScalableMoodleStack extends cdk.Stack {
 
     // VPC
     const vpc = new ec2.Vpc(this, 'moodle-vpc', {
-      maxAzs: 2
+      maxAzs: 2,
+      natGateways: props.multiAzEnabled ? 2 : 1
     });
 
     // EC2 Auto Scaling
@@ -112,7 +117,7 @@ export class ScalableMoodleStack extends cdk.Stack {
       maxAllocatedStorage: 1000,
       storageType: rds.StorageType.GP2,
       autoMinorVersionUpgrade: true,
-      multiAz: true,
+      multiAz: props.multiAzEnabled,
       databaseName: this.MoodleDatabaseName,
       credentials: rds.Credentials.fromGeneratedSecret(this.MoodleDatabaseUsername, { excludeCharacters: '(" %+~`#$&*()|[]{}:;<>?!\'/^-,@_=\\' }), // Punctuations are causing issue with Moodle connecting to the database
       enablePerformanceInsights: true,
@@ -149,9 +154,9 @@ export class ScalableMoodleStack extends cdk.Stack {
       replicationGroupDescription: 'Moodle Redis',
       cacheNodeType: this.ElasticacheRedisInstanceType,
       engine: 'redis',
-      numCacheClusters: 2,
-      multiAzEnabled: true,
-      automaticFailoverEnabled: true,
+      numCacheClusters: props.multiAzEnabled ? 2 : 1,
+      multiAzEnabled: props.multiAzEnabled,
+      automaticFailoverEnabled: props.multiAzEnabled,
       autoMinorVersionUpgrade: true,
       cacheSubnetGroupName: `${cdk.Names.uniqueId(this)}-redis-subnet-group`,
       securityGroupIds: [ redisSG.securityGroupId ],
