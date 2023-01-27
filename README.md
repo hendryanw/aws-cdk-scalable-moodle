@@ -49,11 +49,10 @@ In this guide, we will use AWS Cloud9 as integrated development environment (IDE
 1.	Open **AWS Cloud9 Console** at https://console.aws.amazon.com/cloud9/home 
 2.	Check whether the region selection is already correct, if Cloud9 is not available within your region, you can also launch it in another region.
 3.	On the **AWS Cloud9 Console**, choose **Create Environment**
-4.	Enter the **Name** for your Cloud9 Workspace, then choose **Next step**
-5.	On **Instance type**, choose **t3.small**, then choose **Next step**
-6.	On **Review** page, choose **Create environment**
-
-    ![Cloud9 Create Environment](docs/cloud9-create-environment.png)
+4.	Enter the **Name** for your Cloud9 Workspace
+5.	On **Instance type**, choose **t3.small**
+6.  On **Network settings**, choose **Secure Shell (SSH)**
+6.	Leave the others as default, and then choose **Create**
 
 ### 2.2. Assigning Permission for Cloud9 Workspace
 Before you can use the Cloud9 Workspace, you will need to configure it with appropriate permissions using AWS IAM Role.
@@ -68,21 +67,23 @@ Before you can use the Cloud9 Workspace, you will need to configure it with appr
     ![EC2 Modify IAM Role](/docs/ec2-modify-iam-role.png)
 
 8.	Choose **cloud9-workspace-admin** from **IAM Role** dropdown list, then choose **Save**
-9.	Go back to your **Cloud9 Workspace**, then choose **Settings** icon in the top-right corner. Choose **AWS Settings**, then deactivate the **AWS managed temporary credentials**
-
-    ![Cloud9 Settings Managed Temp Credentials](/docs/cloud9-settings-managed-temp-credentials.png)
-
-10.	Run the following in Cloud9 terminal to reboot the instance
+9.	Go back to your **Cloud9 Workspace**, and run the following to update AWSCLI:
     ```
-    sudo reboot
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install
     ```
-11.	Wait untuk your Cloud9 Workspace is reconnected
-12.	Run the following command to ensure that the permission is correctly attached from IAM Role
+10. Then run the following to ensure temporary credentials aren't already in place. It will remove any existing credentials file as well as disabling AWS managed temporary credentials. 
+    ```
+    aws cloud9 update-environment  --environment-id $C9_PID --managed-credentials-action DISABLE
+    rm -vf ${HOME}/.aws/credentials
+    ```
+11.	Run the following command to ensure that the permission is correctly attached from IAM Role
     ```
     aws sts get-caller-identity
     ```
     Ensure that **cloud9-workspace-admin** is shown in the **Arn** field
-13.	Congratulations! Your Cloud9 Workspace is now ready to be used.
+12.	Congratulations! Your Cloud9 Workspace is now ready to be used.
 
 ### 2.3. Creating EC2 Key Pair
 You need to create an EC2 Key Pair so that you can connect to the Moodle Staging Server via SSH in the later sections.
